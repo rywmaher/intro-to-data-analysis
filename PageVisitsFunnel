@@ -1,0 +1,69 @@
+import codecademylib
+import pandas as pd
+
+visits = pd.read_csv('visits.csv',
+                     parse_dates=[1])
+cart = pd.read_csv('cart.csv',
+                   parse_dates=[1])
+checkout = pd.read_csv('checkout.csv',
+                       parse_dates=[1])
+purchase = pd.read_csv('purchase.csv',
+                       parse_dates=[1])
+
+#2. merge visits and cart
+visits_cart = pd.merge(visits, cart, how='left')
+print visits_cart
+
+#3. how long is merged list
+len(visits_cart.index)
+
+#4. how many entries are null in cart
+no_cart = visits_cart[visits_cart.cart_time.isnull()]
+print no_cart
+
+#5 what percent did not add to cart
+percent_no_cart = len(no_cart)/float(len(visits_cart))
+print percent_no_cart
+'80.5% did not put item in cart'
+
+#6A merge cart-checkout
+cart_checkout = pd.merge(cart, checkout, how='left')
+
+#6B count of null values
+no_checkout =  cart_checkout[cart_checkout.checkout_time.isnull()]
+
+#6C percent checkout
+percent_no_checkout = len(no_checkout)/float(len(cart_checkout))
+print percent_no_checkout
+'20.9% did not checkout'
+
+#7 merge all
+all_data = visits.merge(cart,how='left').merge(checkout,how='left').merge(purchase,how='left')
+print all_data.head()
+
+#8A merge checkout purchase
+checkout_purchase = pd.merge(checkout,purchase, how='left')
+
+#8B Count null purchase
+no_purchase = checkout_purchase[checkout_purchase.purchase_time.isnull()]
+
+#8C Percent not purchased
+percent_no_purchase = len(no_purchase)/float(len(checkout_purchase))
+print percent_no_purchase
+'16% did not purchase after checkout'
+
+#9 Weakest Part
+weakest_part = max(percent_no_cart,percent_no_checkout,percent_no_purchase)
+print weakest_part
+'adding items to cart is weakest point, making it easier to add to cart might encourage visitors to do so'
+
+#10 
+all_data['time_to_purchase'] = \
+    all_data.purchase_time - \
+    all_data.visit_time
+    
+#11
+print all_data.time_to_purchase
+
+#12
+print all_data.time_to_purchase.mean()
